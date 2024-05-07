@@ -1,0 +1,26 @@
+@startuml Belajar Golang
+
+actor User
+participant "Program" as P
+
+User -> P: Start Program
+P -> P: Print "Hello, World!" to console
+P -> P: Declare two variables a and b
+P -> P: Set their values
+P -> P: Swap their values
+P -> P: Define a function that takes two numbers and returns their sum
+P -> User: Ask for an integer input
+User -> P: Provide an integer
+P -> P: Check if the number is even or odd
+P -> P: Print 10 first Fibonacci numbers
+P -> P: Calculate factorial of a number
+P -> P: Find the largest element in an array
+P -> User: Ask for the height of a star triangle
+User -> P: Provide the height
+P -> P: Print a star triangle with the provided height
+P -> P: Define a recursive function to calculate power of a number
+P -> P: Read a text file
+P -> P: Count the number of lines in the file
+P -> User: End Program
+
+@enduml
