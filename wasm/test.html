@@ -117,11 +117,284 @@
                 <div class="text-gray-500">Waiting for WASM to load...</div>
             </div>
         </div>
+
+        <!-- Documentation Section -->
+        <div class="mt-8 bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-islamic-green to-emerald-600 px-6 py-4">
+                <h2 class="text-2xl font-bold text-white flex items-center">
+                    📚 <span class="ml-2">Salat CLI - Usage Guide</span>
+                </h2>
+                <p class="text-emerald-100 mt-1">Prayer times calculator available in two forms: NPM CLI and WebAssembly</p>
+            </div>
+            
+            <div class="p-6">
+                <!-- Navigation Tabs -->
+                <div class="flex mb-6 bg-gray-100 rounded-lg p-1">
+                    <button onclick="showTab('npm')" id="npm-tab" class="tab-button flex-1 py-2 px-4 rounded-md font-medium transition-all duration-200 bg-white text-islamic-green shadow-sm">
+                        📦 NPM CLI
+                    </button>
+                    <button onclick="showTab('wasm')" id="wasm-tab" class="tab-button flex-1 py-2 px-4 rounded-md font-medium transition-all duration-200 text-gray-600 hover:text-gray-800">
+                        🌐 WebAssembly
+                    </button>
+                    <button onclick="showTab('features')" id="features-tab" class="tab-button flex-1 py-2 px-4 rounded-md font-medium transition-all duration-200 text-gray-600 hover:text-gray-800">
+                        ✨ Features
+                    </button>
+                </div>
+
+                <!-- NPM CLI Tab -->
+                <div id="npm-content" class="tab-content">
+                    <div class="space-y-6">
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                            <h3 class="text-lg font-semibold text-blue-800 mb-2">🚀 Installation</h3>
+                            <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm">
+                                <div class="text-green-400"># Install globally</div>
+                                <div class="text-white">npm install -g salat-cli</div>
+                                <div class="text-gray-500 mt-2"># Or run directly</div>
+                                <div class="text-white">npx salat-cli</div>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <h4 class="text-lg font-semibold text-green-800 mb-3 flex items-center">
+                                    🌍 <span class="ml-2">Smart Location Setup</span>
+                                </h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="bg-gray-900 rounded p-2 font-mono">
+                                        <div class="text-green-400"># By address</div>
+                                        <div class="text-white">salat setup "Jakarta, Indonesia"</div>
+                                        <div class="text-white">salat setup "Monas Jakarta"</div>
+                                    </div>
+                                    <div class="bg-gray-900 rounded p-2 font-mono">
+                                        <div class="text-green-400"># By coordinates</div>
+                                        <div class="text-white">salat setup -- "-6.2,106.8"</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                <h4 class="text-lg font-semibold text-purple-800 mb-3 flex items-center">
+                                    ⚡ <span class="ml-2">Main Commands</span>
+                                </h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="bg-gray-900 rounded p-2 font-mono">
+                                        <div class="text-white">salat show    <span class="text-gray-500"># Today's schedule</span></div>
+                                        <div class="text-white">salat next    <span class="text-gray-500"># Next prayer countdown</span></div>
+                                        <div class="text-white">salat watch   <span class="text-gray-500"># Live updates</span></div>
+                                        <div class="text-white">salat now     <span class="text-gray-500"># Current status</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-amber-800 mb-3">📋 Example Output</h4>
+                            <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm">
+                                <div class="text-green-400">🕌 Jadwal Sholat - Friday, 30 May 2025</div>
+                                <div class="text-cyan-400">📍 Kota Jakarta, DKI Jakarta, Indonesia (-6.2088, 106.8456) • Kemenag</div>
+                                <div class="text-white mt-2">
+                                    WAKTU&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;JAM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STATUS<br/>
+                                    -------------------------------<br/>
+                                    🌙&nbsp;&nbsp;Imsak&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;04:27&nbsp;&nbsp;&nbsp;&nbsp;✓<br/>
+                                    🌅&nbsp;&nbsp;Subuh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;04:37&nbsp;&nbsp;&nbsp;&nbsp;✓<br/>
+                                    ☀️&nbsp;&nbsp;Dzuhur&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11:52&nbsp;&nbsp;&nbsp;&nbsp;✓<br/>
+                                    🌤️&nbsp;&nbsp;Ashar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15:14&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+                                    🌇&nbsp;&nbsp;Maghrib&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;17:45<br/>
+                                    ✨&nbsp;&nbsp;Isya&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;18:59<br/>
+                                </div>
+                                <div class="text-yellow-400 mt-2">⏰ Sholat berikutnya: 🌤️ Ashar dalam 1h 22m</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WASM Tab -->
+                <div id="wasm-content" class="tab-content hidden">
+                    <div class="space-y-6">
+                        <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r-lg">
+                            <h3 class="text-lg font-semibold text-indigo-800 mb-2">🌐 Browser Integration</h3>
+                            <p class="text-indigo-700 mb-3">Use Salat directly in your web applications without any backend setup!</p>
+                            <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm">
+                                <div class="text-green-400">&lt;!-- Include WASM files --&gt;</div>
+                                <div class="text-white">&lt;script src="wasm_exec.js"&gt;&lt;/script&gt;</div>
+                                <div class="text-white">&lt;script src="salat.js"&gt;&lt;/script&gt;</div>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
+                                <h4 class="text-lg font-semibold text-cyan-800 mb-3 flex items-center">
+                                    🔧 <span class="ml-2">JavaScript API</span>
+                                </h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="bg-gray-900 rounded p-2 font-mono">
+                                        <div class="text-green-400">// Prayer times</div>
+                                        <div class="text-white">const result = salatPrayerTime(</div>
+                                        <div class="text-white">&nbsp;&nbsp;-6.2088, 106.8456, "Kemenag"</div>
+                                        <div class="text-white">);</div>
+                                        <div class="text-cyan-400">console.log(JSON.parse(result));</div>
+                                    </div>
+                                    <div class="bg-gray-900 rounded p-2 font-mono">
+                                        <div class="text-green-400">// Version info</div>
+                                        <div class="text-white">const version = salatVersion();</div>
+                                        <div class="text-green-400">// Console commands</div>
+                                        <div class="text-white">salatConsole("prayer -6.2 106.8");</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-rose-50 border border-rose-200 rounded-lg p-4">
+                                <h4 class="text-lg font-semibold text-rose-800 mb-3 flex items-center">
+                                    📱 <span class="ml-2">Use Cases</span>
+                                </h4>
+                                <ul class="space-y-2 text-sm text-rose-700">
+                                    <li class="flex items-center">
+                                        <div class="w-2 h-2 bg-rose-400 rounded-full mr-2"></div>
+                                        <span>Chat applications & bots</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <div class="w-2 h-2 bg-rose-400 rounded-full mr-2"></div>
+                                        <span>Web-based Islamic apps</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <div class="w-2 h-2 bg-rose-400 rounded-full mr-2"></div>
+                                        <span>Terminal libraries</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <div class="w-2 h-2 bg-rose-400 rounded-full mr-2"></div>
+                                        <span>Progressive Web Apps</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <div class="w-2 h-2 bg-rose-400 rounded-full mr-2"></div>
+                                        <span>Electron applications</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-emerald-800 mb-3">⚡ CDN Usage</h4>
+                            <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm">
+                                <div class="text-green-400">&lt;!-- Load from GitHub releases --&gt;</div>
+                                <div class="text-white">&lt;script src="https://github.com/herbras/BelGolang/releases/latest/download/wasm_exec.js"&gt;&lt;/script&gt;</div>
+                                <div class="text-white">&lt;script src="https://github.com/herbras/BelGolang/releases/latest/download/salat.js"&gt;&lt;/script&gt;</div>
+                                <div class="text-gray-500 mt-2">// WASM file automatically loaded</div>
+                                <div class="text-cyan-400">salatPrayerTime(-6.2088, 106.8456, "Kemenag");</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features Tab -->
+                <div id="features-content" class="tab-content hidden">
+                    <div class="space-y-6">
+                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-4">
+                                <div class="text-2xl mb-2">🌍</div>
+                                <h4 class="font-semibold text-blue-800 mb-2">Smart Location</h4>
+                                <p class="text-sm text-blue-700">Setup with addresses or coordinates. Auto-geocoding with Nominatim/Photon APIs.</p>
+                            </div>
+
+                            <div class="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
+                                <div class="text-2xl mb-2">⚡</div>
+                                <h4 class="font-semibold text-green-800 mb-2">Real-time Updates</h4>
+                                <p class="text-sm text-green-700">Live countdown to next prayer with watch mode and optional notifications.</p>
+                            </div>
+
+                            <div class="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4">
+                                <div class="text-2xl mb-2">🎨</div>
+                                <h4 class="font-semibold text-purple-800 mb-2">Beautiful UI</h4>
+                                <p class="text-sm text-purple-700">Colorful terminal interface with emojis and multiple theme options.</p>
+                            </div>
+
+                            <div class="bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 rounded-lg p-4">
+                                <div class="text-2xl mb-2">⚙️</div>
+                                <h4 class="font-semibold text-amber-800 mb-2">8 Calculation Methods</h4>
+                                <p class="text-sm text-amber-700">MWL, ISNA, Egypt, Makkah, Karachi, Tehran, Kemenag (default), JAKIM.</p>
+                            </div>
+
+                            <div class="bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-200 rounded-lg p-4">
+                                <div class="text-2xl mb-2">🌐</div>
+                                <h4 class="font-semibold text-rose-800 mb-2">Cross-platform</h4>
+                                <p class="text-sm text-rose-700">Available as NPM CLI (Node.js) and WebAssembly (browsers).</p>
+                            </div>
+
+                            <div class="bg-gradient-to-br from-gray-50 to-slate-50 border border-gray-200 rounded-lg p-4">
+                                <div class="text-2xl mb-2">📱</div>
+                                <h4 class="font-semibold text-gray-800 mb-2">Offline-first</h4>
+                                <p class="text-sm text-gray-700">One-time geocoding setup, then works completely offline.</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gradient-to-r from-islamic-green to-emerald-600 rounded-lg p-6 text-white">
+                            <h3 class="text-xl font-bold mb-4 flex items-center">
+                                🎯 <span class="ml-2">Perfect For</span>
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <h4 class="font-semibold mb-2 text-emerald-100">🖥️ CLI Users</h4>
+                                    <ul class="space-y-1 text-emerald-100">
+                                        <li>• Terminal enthusiasts</li>
+                                        <li>• System administrators</li>
+                                        <li>• Script automation</li>
+                                        <li>• Linux/macOS power users</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold mb-2 text-emerald-100">🌐 Web Developers</h4>
+                                    <ul class="space-y-1 text-emerald-100">
+                                        <li>• Islamic web applications</li>
+                                        <li>• Chat bots & messaging apps</li>
+                                        <li>• Progressive Web Apps</li>
+                                        <li>• Electron applications</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center py-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Ready to get started?</h3>
+                            <p class="text-gray-600 mb-4">Choose your preferred method and start calculating prayer times!</p>
+                            <div class="flex justify-center space-x-4">
+                                <button onclick="showTab('npm')" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200">
+                                    📦 Use NPM CLI
+                                </button>
+                                <button onclick="showTab('wasm')" class="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200">
+                                    🌐 Use WebAssembly
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- WASM Scripts -->
     <script src="wasm_exec.js"></script>
     <script>
+        // Tab functionality
+        function showTab(tabName) {
+            // Hide all content
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.add('hidden'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab-button');
+            tabs.forEach(tab => {
+                tab.classList.remove('bg-white', 'text-islamic-green', 'shadow-sm');
+                tab.classList.add('text-gray-600');
+            });
+            
+            // Show selected content
+            document.getElementById(tabName + '-content').classList.remove('hidden');
+            
+            // Add active class to selected tab
+            const activeTab = document.getElementById(tabName + '-tab');
+            activeTab.classList.add('bg-white', 'text-islamic-green', 'shadow-sm');
+            activeTab.classList.remove('text-gray-600');
+        }
+
         const go = new Go();
         let wasmLoaded = false;
         
