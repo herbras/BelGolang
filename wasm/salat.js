@@ -108,20 +108,21 @@
 
         // Terminal integration
         createTerminal(terminalElement) {
+            const self = this;
             const terminal = {
                 element: terminalElement,
                 history: [],
                 
                 async execute(command) {
                     try {
-                        const result = await this.command(command);
+                        const result = await self.command(command);
                         this.addOutput(JSON.stringify(result, null, 2));
                         return result;
                     } catch (error) {
                         this.addOutput(`Error: ${error.message}`);
                         return { error: error.message };
                     }
-                }.bind(this),
+                },
 
                 addOutput(text) {
                     if (this.element) {
