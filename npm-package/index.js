@@ -126,8 +126,18 @@ async function main() {
   await runSalatCLI(binaryPath, args);
 }
 
-// ES module entry point check
-if (import.meta.url === `file://${process.argv[1]}` || import.meta.url.endsWith(process.argv[1])) {
+// ES module entry point check - fixed for Bun compatibility
+const isMainModule = () => {
+  // For Bun/Windows: normalize paths for comparison
+  const metaPath = import.meta.url.replace('file:///', '').replace(/\//g, '\\');
+  const argvPath = process.argv[1];
+  
+  return metaPath === argvPath || 
+         import.meta.url === `file://${process.argv[1]}` || 
+         import.meta.url.endsWith(process.argv[1]);
+};
+
+if (isMainModule()) {
   main().catch(error => {
     console.error('❌ Unexpected error:', error.message);
     (typeof Deno !== 'undefined' ? Deno.exit : process.exit)(1);
