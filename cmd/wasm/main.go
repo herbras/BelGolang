@@ -17,9 +17,7 @@ type SalatAPI struct{}
 // ProcessPrayerTime processes prayer time calculation and returns JSON
 func (api *SalatAPI) ProcessPrayerTime(this js.Value, args []js.Value) interface{} {
 	if len(args) < 2 {
-		return map[string]interface{}{
-			"error": "Missing required arguments: latitude, longitude",
-		}
+		return `{"error": "Missing required arguments: latitude, longitude"}`
 	}
 
 	lat := args[0].Float()
@@ -60,9 +58,7 @@ func (api *SalatAPI) ProcessPrayerTime(this js.Value, args []js.Value) interface
 	now := time.Now()
 	times, err := salat.TimesForDate(now, location)
 	if err != nil {
-		return map[string]interface{}{
-			"error": fmt.Sprintf("Failed to calculate prayer times: %v", err),
-		}
+		return fmt.Sprintf(`{"error": "Failed to calculate prayer times: %v"}`, err)
 	}
 
 	// Get current prayer
@@ -80,72 +76,86 @@ func (api *SalatAPI) ProcessPrayerTime(this js.Value, args []js.Value) interface
 		nextPrayerStr = "Unknown"
 	}
 
-	// Build result with only basic types
-	result := map[string]interface{}{
-		"location": map[string]interface{}{
-			"latitude":  lat,
-			"longitude": lng,
+	// Build result as JSON string
+	result := fmt.Sprintf(`{
+		"location": {
+			"latitude": %f,
+			"longitude": %f
 		},
-		"method": string(method),
-		"date":   now.Format("2006-01-02"),
-		"prayers": map[string]interface{}{
-			"imsak":   times.Imsak.Format("15:04"),
-			"subuh":   times.Subuh.Format("15:04"),
-			"dzuhur":  times.Dzuhur.Format("15:04"),
-			"ashar":   times.Ashar.Format("15:04"),
-			"maghrib": times.Maghrib.Format("15:04"),
-			"isya":    times.Isya.Format("15:04"),
+		"method": "%s",
+		"date": "%s",
+		"prayers": {
+			"imsak": "%s",
+			"subuh": "%s",
+			"dzuhur": "%s",
+			"ashar": "%s",
+			"maghrib": "%s",
+			"isya": "%s"
 		},
-		"current": map[string]interface{}{
-			"prayer": currentPrayerStr,
-			"emoji":  salat.GetPrayerEmoji(currentPrayerStr),
+		"current": {
+			"prayer": "%s",
+			"emoji": "%s"
 		},
-		"next": map[string]interface{}{
-			"prayer": nextPrayerStr,
-			"time":   nextPrayerTime.Format("15:04"),
-			"emoji":  salat.GetPrayerEmoji(nextPrayerStr),
+		"next": {
+			"prayer": "%s",
+			"time": "%s",
+			"emoji": "%s"
 		},
-		"timestamp": now.Format(time.RFC3339),
-	}
+		"timestamp": "%s"
+	}`,
+		lat, lng,
+		string(method),
+		now.Format("2006-01-02"),
+		times.Imsak.Format("15:04"),
+		times.Subuh.Format("15:04"),
+		times.Dzuhur.Format("15:04"),
+		times.Ashar.Format("15:04"),
+		times.Maghrib.Format("15:04"),
+		times.Isya.Format("15:04"),
+		currentPrayerStr,
+		salat.GetPrayerEmoji(currentPrayerStr),
+		nextPrayerStr,
+		nextPrayerTime.Format("15:04"),
+		salat.GetPrayerEmoji(nextPrayerStr),
+		now.Format(time.RFC3339),
+	)
 
 	return result
 }
 
 // GetVersion returns the current version
 func (api *SalatAPI) GetVersion(this js.Value, args []js.Value) interface{} {
-	return map[string]string{
+	return `{
 		"version": "1.6.1",
-		"build":   "wasm",
+		"build": "wasm",
 		"runtime": "browser",
-		"methods": "MWL,ISNA,Egypt,Makkah,Karachi,Tehran,Kemenag,JAKIM",
-	}
+		"methods": "MWL,ISNA,Egypt,Makkah,Karachi,Tehran,Kemenag,JAKIM"
+	}`
 }
 
 // ProcessCommand processes CLI-like commands
 func (api *SalatAPI) ProcessCommand(this js.Value, args []js.Value) interface{} {
 	if len(args) < 1 {
-		return map[string]interface{}{
-			"error": "No command provided",
-		}
+		return `{"error": "No command provided"}`
 	}
 
 	command := args[0].String()
 
 	switch command {
 	case "help":
-		return map[string]interface{}{
-			"commands": []string{
+		return `{
+			"commands": [
 				"prayer <lat> <lng> [method] - Calculate prayer times",
 				"version - Get version info",
 				"methods - List available calculation methods",
-				"help - Show this help",
-			},
-		}
+				"help - Show this help"
+			]
+		}`
 	case "version":
 		return api.GetVersion(this, args[1:])
 	case "methods":
-		return map[string]interface{}{
-			"methods": []string{
+		return `{
+			"methods": [
 				"MWL - Muslim World League",
 				"ISNA - Islamic Society of North America",
 				"Egypt - Egyptian General Authority of Survey",
@@ -153,27 +163,21 @@ func (api *SalatAPI) ProcessCommand(this js.Value, args []js.Value) interface{} 
 				"Karachi - University of Islamic Sciences, Karachi",
 				"Tehran - Institute of Geophysics, University of Tehran",
 				"Kemenag - Kementerian Agama Republik Indonesia (default)",
-				"JAKIM - Jabatan Kemajuan Islam Malaysia",
-			},
-		}
+				"JAKIM - Jabatan Kemajuan Islam Malaysia"
+			]
+		}`
 	case "prayer":
 		if len(args) < 3 {
-			return map[string]interface{}{
-				"error": "Prayer command requires: lat, lng, [method]",
-			}
+			return `{"error": "Prayer command requires: lat, lng, [method]"}`
 		}
 		// Convert string args to proper types
 		lat, err := strconv.ParseFloat(args[1].String(), 64)
 		if err != nil {
-			return map[string]interface{}{
-				"error": "Invalid latitude: " + args[1].String(),
-			}
+			return fmt.Sprintf(`{"error": "Invalid latitude: %s"}`, args[1].String())
 		}
 		lng, err := strconv.ParseFloat(args[2].String(), 64)
 		if err != nil {
-			return map[string]interface{}{
-				"error": "Invalid longitude: " + args[2].String(),
-			}
+			return fmt.Sprintf(`{"error": "Invalid longitude: %s"}`, args[2].String())
 		}
 
 		// Create new args with proper types
@@ -187,9 +191,7 @@ func (api *SalatAPI) ProcessCommand(this js.Value, args []js.Value) interface{} 
 
 		return api.ProcessPrayerTime(this, newArgs)
 	default:
-		return map[string]interface{}{
-			"error": fmt.Sprintf("Unknown command: %s", command),
-		}
+		return fmt.Sprintf(`{"error": "Unknown command: %s"}`, command)
 	}
 }
 
