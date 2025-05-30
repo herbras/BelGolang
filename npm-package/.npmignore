@@ -1,0 +1,26 @@
+# Development files
+.git/
+.github/
+.vscode/
+.idea/
+
+*.go
+go.mod
+go.sum
+
+# Build artifacts
+dist/
+
+# Test files
+*_test.go
+
+# Temporary files
+tmp/
+temp/
+
+# Logs
+*.log
+
+# OS specific files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,53 @@
+{
+  "name": "salat-cli",
+  "version": "1.6.0",
+  "description": "Interactive CLI for Islamic prayer times with smart location input and geocoding",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "salat": "./index.js"
+  },
+  "scripts": {
+    "postinstall": "node index.js --verify-install",
+    "test": "node index.js show --test"
+  },
+  "keywords": [
+    "prayer-times",
+    "islamic",
+    "salat",
+    "cli",
+    "muslim",
+    "timezone",
+    "countdown",
+    "geocoding",
+    "location",
+    "coordinates",
+    "nominatim",
+    "photon",
+    "address-search"
+  ],
+  "author": "Ibrahim Nurul Huda <ibrahim@sarbeh.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/herbras/BelGolang.git"
+  },
+  "bugs": {
+    "url": "https://github.com/herbras/BelGolang/issues"
+  },
+  "os": ["darwin", "linux", "win32"],
+  "cpu": ["x64", "arm64"],
+  "engines": {
+    "node": ">=14.0.0",
+    "bun": ">=1.0.0"
+  },
+  "deno": {
+    "permissions": ["--allow-run"]
+  },
+  "files": [
+    "bin/**/*",
+    "index.js",
+    "README.md",
+    "LICENSE"
+  ]
+}

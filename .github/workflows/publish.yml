@@ -1,0 +1,76 @@
+name: Build and Publish NPM Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+          
+      - name: Install dependencies
+        run: go mod download
+        
+      - name: Run tests
+        run: go test ./...
+        
+      - name: Create bin directory structure
+        run: |
+          mkdir -p npm-package/bin/{darwin-x64,darwin-arm64,linux-x64,linux-arm64,win32-x64,win32-arm64}
+          
+      - name: Build binaries for all platforms
+        run: |
+          # macOS
+          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o npm-package/bin/darwin-x64/salat .
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o npm-package/bin/darwin-arm64/salat .
+          
+          # Linux
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o npm-package/bin/linux-x64/salat .
+          GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o npm-package/bin/linux-arm64/salat .
+          
+          # Windows
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o npm-package/bin/win32-x64/salat.exe .
+          GOOS=windows GOARCH=arm64 go build -ldflags="-s -w" -o npm-package/bin/win32-arm64/salat.exe .
+          
+      - name: Make binaries executable
+        run: |
+          chmod +x npm-package/bin/*/salat
+          
+      - name: Copy package files
+        run: |
+          cp npm-package/package.json npm-package/
+          cp npm-package/index.js npm-package/
+          cp README.md npm-package/
+          echo 'MIT' > npm-package/LICENSE
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+          
+      - name: Publish to NPM
+        run: |
+          cd npm-package
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            npm-package/bin/**/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
