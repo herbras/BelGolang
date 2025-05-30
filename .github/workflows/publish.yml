@@ -50,7 +50,6 @@ jobs:
         run: |
           cp npm-package/package.json npm-package/
           cp npm-package/index.js npm-package/
-          cp README.md npm-package/
           echo 'MIT' > npm-package/LICENSE
           
       - name: Setup Node.js
@@ -71,6 +70,7 @@ jobs:
         with:
           files: |
             npm-package/bin/**/*
-          generate_release_notes: true
+          body_path: npm-package/README.md
+          generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
