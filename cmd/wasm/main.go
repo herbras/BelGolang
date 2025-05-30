@@ -69,14 +69,26 @@ func (api *SalatAPI) ProcessPrayerTime(this js.Value, args []js.Value) interface
 	currentPrayer, _ := salat.GetCurrentPrayer(now, times)
 	nextPrayerName, nextPrayerTime := salat.GetNextPrayer(now, times)
 
+	// Ensure all values are basic types
+	currentPrayerStr := currentPrayer
+	if currentPrayerStr == "" {
+		currentPrayerStr = "Unknown"
+	}
+
+	nextPrayerStr := nextPrayerName
+	if nextPrayerStr == "" {
+		nextPrayerStr = "Unknown"
+	}
+
+	// Build result with only basic types
 	result := map[string]interface{}{
-		"location": map[string]float64{
+		"location": map[string]interface{}{
 			"latitude":  lat,
 			"longitude": lng,
 		},
 		"method": string(method),
 		"date":   now.Format("2006-01-02"),
-		"prayers": map[string]string{
+		"prayers": map[string]interface{}{
 			"imsak":   times.Imsak.Format("15:04"),
 			"subuh":   times.Subuh.Format("15:04"),
 			"dzuhur":  times.Dzuhur.Format("15:04"),
@@ -85,13 +97,13 @@ func (api *SalatAPI) ProcessPrayerTime(this js.Value, args []js.Value) interface
 			"isya":    times.Isya.Format("15:04"),
 		},
 		"current": map[string]interface{}{
-			"prayer": currentPrayer,
-			"emoji":  salat.GetPrayerEmoji(currentPrayer),
+			"prayer": currentPrayerStr,
+			"emoji":  salat.GetPrayerEmoji(currentPrayerStr),
 		},
 		"next": map[string]interface{}{
-			"prayer": nextPrayerName,
+			"prayer": nextPrayerStr,
 			"time":   nextPrayerTime.Format("15:04"),
-			"emoji":  salat.GetPrayerEmoji(nextPrayerName),
+			"emoji":  salat.GetPrayerEmoji(nextPrayerStr),
 		},
 		"timestamp": now.Format(time.RFC3339),
 	}
