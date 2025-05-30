@@ -126,17 +126,20 @@ async function main() {
   await runSalatCLI(binaryPath, args);
 }
 
-// ES module entry point check - cross-platform compatible
+// ES module entry point check - robust cross-platform and multi-Node.js compatible
 const isMainModule = async () => {
   try {
+    // Method 1: Direct comparison (works for most cases)
     if (import.meta.url === `file://${process.argv[1]}`) {
       return true;
     }
     
+    // Method 2: EndsWith check (fallback)
     if (import.meta.url.endsWith(process.argv[1])) {
       return true;
     }
     
+    // Method 3: Path normalization for cross-platform compatibility
     const { fileURLToPath } = await import('url');
     const metaPath = fileURLToPath(import.meta.url);
     const argvPath = process.argv[1];
@@ -146,12 +149,30 @@ const isMainModule = async () => {
       return true;
     }
     
+    // Method 4: Normalize both paths and compare (handles different path separators)
     const path = await import('path');
     const normalizedMeta = path.resolve(metaPath);
     const normalizedArgv = path.resolve(argvPath);
     
-    return normalizedMeta === normalizedArgv;
+    if (normalizedMeta === normalizedArgv) {
+      return true;
+    }
+    
+    // Method 5: Compare just the filename and parent directory (handles different Node.js installations)
+    const metaBasename = path.basename(metaPath);
+    const argvBasename = path.basename(argvPath);
+    const metaParent = path.basename(path.dirname(metaPath));
+    const argvParent = path.basename(path.dirname(argvPath));
+    
+    // If both are index.js in salat-cli directory, assume it's the same file
+    if (metaBasename === 'index.js' && argvBasename === 'index.js' && 
+        metaParent === 'salat-cli' && argvParent === 'salat-cli') {
+      return true;
+    }
+    
+    return false;
   } catch (error) {
+    // Fallback: if all else fails, assume we're being run directly
     console.warn('Entry point detection failed, assuming direct execution');
     return true;
   }
