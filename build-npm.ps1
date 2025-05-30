@@ -90,17 +90,27 @@ if ($upxChoice -ne "n" -and $upxChoice -ne "N") {
             $originalSize = $_.Length
             $totalOriginalSize += $originalSize
             
-            Write-Host "Compressing $($_.Name)..." -ForegroundColor Gray
-            & upx --best --lzma $_.FullName 2>$null
+            $platform = (Split-Path (Split-Path $_.FullName -Parent) -Leaf)
+            $binaryName = $_.Name
+            
+            Write-Host "Compressing $platform/$binaryName..." -ForegroundColor Gray
+            
+            # Use appropriate UPX flags based on platform
+            if ($platform -like "darwin-*") {
+                Write-Host "  Using --force-macos flag for macOS binary" -ForegroundColor Gray
+                & upx --best --lzma --force-macos $_.FullName 2>$null
+            } else {
+                & upx --best --lzma $_.FullName 2>$null
+            }
             
             if ($LASTEXITCODE -eq 0) {
                 $compressedSize = (Get-Item $_.FullName).Length
                 $totalCompressedSize += $compressedSize
                 $reduction = [math]::Round(($originalSize - $compressedSize) / $originalSize * 100, 1)
-                Write-Host "  ✅ $($_.Name): ${reduction}% reduction" -ForegroundColor Green
+                Write-Host "  ✅ $platform/$binaryName : ${reduction}% reduction" -ForegroundColor Green
                 $compressedCount++
             } else {
-                Write-Host "  ⚠️ Failed to compress $($_.Name)" -ForegroundColor Red
+                Write-Host "  ⚠️ Failed to compress $platform/$binaryName" -ForegroundColor Red
                 $totalCompressedSize += $originalSize
             }
         }

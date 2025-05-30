@@ -90,7 +90,7 @@ jobs:
           
       - name: Compress binaries with UPX
         run: |
-          echo "🗜️  Compressing binaries with UPX..."
+          echo "🗜️  Compressing binaries with UPX v5.0.1..."
           
           # Compress all binaries
           total_original=0
@@ -98,18 +98,31 @@ jobs:
           
           for binary in npm-package/bin/*/salat*; do
             if [ -f "$binary" ]; then
-              echo "Compressing: $binary"
+              platform=$(basename $(dirname "$binary"))
+              binary_name=$(basename "$binary")
+              echo "Compressing: $platform/$binary_name"
+              
               original_size=$(stat -f%z "$binary" 2>/dev/null || stat -c%s "$binary")
               total_original=$((total_original + original_size))
               
-              # UPX compress
-              upx --best --lzma "$binary"
+              # UPX compress with platform-specific flags
+              if [[ "$platform" == darwin-* ]]; then
+                echo "  Using --force-macos flag for macOS binary"
+                upx --best --lzma --force-macos "$binary"
+              else
+                upx --best --lzma "$binary"
+              fi
               
-              compressed_size=$(stat -f%z "$binary" 2>/dev/null || stat -c%s "$binary")
-              total_compressed=$((total_compressed + compressed_size))
-              
-              reduction=$(( (original_size - compressed_size) * 100 / original_size ))
-              echo "  ✅ $binary: ${reduction}% reduction"
+              if [ $? -eq 0 ]; then
+                compressed_size=$(stat -f%z "$binary" 2>/dev/null || stat -c%s "$binary")
+                total_compressed=$((total_compressed + compressed_size))
+                
+                reduction=$(( (original_size - compressed_size) * 100 / original_size ))
+                echo "  ✅ $platform/$binary_name: ${reduction}% reduction"
+              else
+                echo "  ❌ Failed to compress $platform/$binary_name"
+                total_compressed=$((total_compressed + original_size))
+              fi
             fi
           done
           
@@ -220,24 +233,25 @@ jobs:
             
             ### 🎯 Ultra Optimizations
             - **79% smaller binaries** (13.41MB → ~2.8MB per binary)
-            - **UPX LZMA compression** applied to all binaries
+            - **UPX v5.0.1 LZMA compression** applied to all binaries
             - **Static binaries** with embedded timezone database
             - **Works offline** - no external dependencies
             - **Cross-platform** support (Windows, macOS, Linux × AMD64/ARM64)
             
-            ### 📊 Binary Sizes (UPX Compressed)
+            ### 📊 Binary Sizes (UPX v5.0.1 Compressed)
             All binaries are ultra-optimized with:
             - `CGO_ENABLED=0` - Static linking
             - `-ldflags="-s -w"` - Strip symbols
             - `-trimpath` - Remove build paths  
-            - `upx --best --lzma` - Maximum compression
+            - `upx v5.0.1 --best --lzma` - Latest compression
+            - `--force-macos` flag for macOS compatibility
             
             Typical sizes: ~2.8MB per binary (vs 13.41MB unoptimized)
             
             ### 🛠️ Technical Details
             - **Timezone Fix**: Embedded IANA timezone database
             - **Static Binaries**: No CGO dependencies
-            - **UPX Compressed**: Ready to run, maximum compression
-            - **Tested**: All binaries tested post-compression
+            - **UPX v5.0.1**: Latest compression with macOS support
+            - **Cross-platform tested**: All binaries verified post-compression
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
