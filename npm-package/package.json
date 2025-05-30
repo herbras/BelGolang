@@ -1,6 +1,6 @@
 {
   "name": "salat-cli",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "description": "Interactive CLI for Islamic prayer times with smart location input and geocoding",
   "main": "index.js",
   "type": "module",
