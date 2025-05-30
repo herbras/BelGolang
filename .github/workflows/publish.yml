@@ -274,4 +274,4 @@ jobs:
             - **Cross-platform tested**: All binaries verified post-compression
             - **Note**: Windows ARM64 uses uncompressed binary (~9MB) due to UPX limitation
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
