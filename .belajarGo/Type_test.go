@@ -52,4 +52,3 @@ func TestConstantDeclarations(t *testing.T) {
 func TestTypeExample(t *testing.T) {
 	typeExample()
 }
-
