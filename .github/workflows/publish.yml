@@ -3,8 +3,14 @@ name: Build and Publish NPM Package
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+  actions: read
+  checks: write
 
 jobs:
   build-and-publish:
@@ -12,7 +18,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Extract version from tag
         id: version
         run: |
@@ -21,65 +27,65 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
-      
+
       - name: Update package.json version
         run: |
           cd npm-package
           # Update version in package.json using jq
           jq --arg version "${{ steps.version.outputs.version }}" '.version = $version' package.json > package.json.tmp && mv package.json.tmp package.json
           echo "Updated package.json to version ${{ steps.version.outputs.version }}"
-      
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.23'
-          
+          go-version: "1.23"
+
       - name: Install dependencies
         run: go mod download
-        
+
       - name: Run tests
         run: go test ./...
-        
+
       - name: Create bin directory structure
         run: |
           mkdir -p npm-package/bin/{darwin-x64,darwin-arm64,linux-x64,linux-arm64,win32-x64,win32-arm64}
-          
+
       - name: Build binaries for all platforms (optimized with timezone fix)
         run: |
           # Build with optimization flags and static linking (timezone fix included via main.go import)
-          
+
           # macOS
           CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.version }}" -trimpath -o npm-package/bin/darwin-x64/salat .
           CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.version }}" -trimpath -o npm-package/bin/darwin-arm64/salat .
-          
+
           # Linux
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.version }}" -trimpath -o npm-package/bin/linux-x64/salat .
           CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.version }}" -trimpath -o npm-package/bin/linux-arm64/salat .
-          
+
           # Windows
           CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.version }}" -trimpath -o npm-package/bin/win32-x64/salat.exe .
           CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.version }}" -trimpath -o npm-package/bin/win32-arm64/salat.exe .
-          
+
       - name: Build WASM (optimized)
         run: |
           # Build WebAssembly module with optimization
           CGO_ENABLED=0 GOOS=js GOARCH=wasm go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.version }}" -trimpath -o wasm/salat.wasm ./cmd/wasm
-          
+
           # Copy Go WASM exec helper
           cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" wasm/
-          
+
       - name: Show binary sizes
         run: |
           echo "📊 Binary sizes:"
           find npm-package/bin -name "salat*" -exec ls -lh {} \; | awk '{print "  " $9 ": " $5}'
-          
+
           echo "📦 WASM size:"
           ls -lh wasm/salat.wasm | awk '{print "  " $9 ": " $5}'
-          
+
       - name: Make binaries executable
         run: |
           chmod +x npm-package/bin/*/salat
-          
+
       - name: Install UPX
         run: |
           echo "📦 Installing UPX v5.0.1 for binary compression..."
@@ -87,15 +93,15 @@ jobs:
           tar -xf upx-5.0.1-amd64_linux.tar.xz
           sudo cp upx-5.0.1-amd64_linux/upx /usr/local/bin/
           upx --version
-          
+
       - name: Compress binaries with UPX
         run: |
           echo "🗜️  Compressing binaries with UPX v5.0.1..."
-          
+
           # Compress all binaries with platform-specific handling
           total_original=0
           total_compressed=0
-          
+
           for binary in npm-package/bin/*/salat*; do
             if [ -f "$binary" ]; then
               platform=$(basename $(dirname "$binary"))
@@ -132,7 +138,7 @@ jobs:
               fi
             fi
           done
-          
+
           # Calculate total reduction
           if [ $total_original -gt 0 ]; then
             total_reduction=$(( (total_original - total_compressed) * 100 / total_original ))
@@ -140,11 +146,11 @@ jobs:
             echo "  Original total: $(( total_original / 1024 / 1024 ))MB"
             echo "  Compressed total: $(( total_compressed / 1024 / 1024 ))MB"
           fi
-          
+
       - name: Test compressed binaries
         run: |
           echo "🧪 Testing UPX-compressed binaries..."
-          
+
           # Test all binaries - executable ones and verify others
           for binary in npm-package/bin/*/salat*; do
             if [ -f "$binary" ]; then
@@ -179,33 +185,33 @@ jobs:
               fi
             fi
           done
-          
+
           echo "🎉 All binaries verified successfully!"
-          
+
       - name: Show final binary sizes
         run: |
           echo "📊 Final UPX-compressed binary sizes:"
           find npm-package/bin -name "salat*" -exec ls -lh {} \; | awk '{print "  " $9 ": " $5}'
-          
+
           echo "📦 WASM size:"
           ls -lh wasm/salat.wasm | awk '{print "  " $9 ": " $5}'
-          
+
       - name: Copy package files
         run: |
           # Copy README.md to npm-package
           if [ -f "README.md" ]; then
             cp README.md npm-package/
           fi
-          
+
           # Create LICENSE file
           echo 'MIT' > npm-package/LICENSE
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
-          
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
+
       - name: Verify package.json
         run: |
           cd npm-package
@@ -214,14 +220,14 @@ jobs:
           echo "  Version: $(jq -r '.version' package.json)"
           echo "  Files:"
           jq -r '.files[]' package.json | sed 's/^/    /'
-          
+
       - name: Publish to NPM
         run: |
           cd npm-package
           npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -233,18 +239,18 @@ jobs:
             wasm/wasm_exec.js
           body: |
             ## 🚀 Release ${{ steps.version.outputs.tag }}
-            
+
             ### 📦 Downloads
             - **NPM**: `npm install -g salat-cli@${{ steps.version.outputs.version }}`
             - **WASM**: Download `salat.wasm` for browser usage
-            
+
             ### 🎯 Ultra Optimizations
             - **79% smaller binaries** (13.41MB → ~2.8MB per binary)*
             - **UPX v5.0.1 LZMA compression** applied to supported platforms
             - **Static binaries** with embedded timezone database
             - **Works offline** - no external dependencies
             - **Cross-platform** support (Windows, macOS, Linux × AMD64/ARM64)
-            
+
             ### 📊 Binary Sizes (UPX v5.0.1 Compressed)
             Optimized binaries with:
             - `CGO_ENABLED=0` - Static linking
@@ -252,7 +258,7 @@ jobs:
             - `-trimpath` - Remove build paths  
             - `upx v5.0.1 --best --lzma` - Latest compression*
             - `--force-macos` flag for macOS compatibility
-            
+
             **UPX Compression Coverage:**
             - ✅ **Windows x64**: ~2.8MB (70%+ reduction)
             - ⚠️ **Windows ARM64**: ~9.1MB (UPX v5.0.1 not yet supported)
@@ -260,7 +266,7 @@ jobs:
             - ✅ **macOS ARM64**: ~2.6MB (72%+ reduction)
             - ✅ **Linux x64**: ~2.9MB (70%+ reduction)
             - ✅ **Linux ARM64**: ~2.5MB (73%+ reduction)
-            
+
             ### 🛠️ Technical Details
             - **Timezone Fix**: Embedded IANA timezone database
             - **Static Binaries**: No CGO dependencies
