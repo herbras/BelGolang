@@ -92,7 +92,7 @@ jobs:
         run: |
           echo "🗜️  Compressing binaries with UPX v5.0.1..."
           
-          # Compress all binaries
+          # Compress all binaries with platform-specific handling
           total_original=0
           total_compressed=0
           
@@ -104,6 +104,13 @@ jobs:
               
               original_size=$(stat -f%z "$binary" 2>/dev/null || stat -c%s "$binary")
               total_original=$((total_original + original_size))
+              
+              # Skip Windows ARM64 - not supported by UPX v5.0.1 yet
+              if [[ "$platform" == "win32-arm64" ]]; then
+                echo "  ⏭️  Skipping Windows ARM64 - not supported by UPX v5.0.1"
+                total_compressed=$((total_compressed + original_size))
+                continue
+              fi
               
               # UPX compress with platform-specific flags
               if [[ "$platform" == darwin-* ]]; then
@@ -120,7 +127,7 @@ jobs:
                 reduction=$(( (original_size - compressed_size) * 100 / original_size ))
                 echo "  ✅ $platform/$binary_name: ${reduction}% reduction"
               else
-                echo "  ❌ Failed to compress $platform/$binary_name"
+                echo "  ⚠️  Failed to compress $platform/$binary_name (keeping original)"
                 total_compressed=$((total_compressed + original_size))
               fi
             fi
@@ -232,26 +239,33 @@ jobs:
             - **WASM**: Download `salat.wasm` for browser usage
             
             ### 🎯 Ultra Optimizations
-            - **79% smaller binaries** (13.41MB → ~2.8MB per binary)
-            - **UPX v5.0.1 LZMA compression** applied to all binaries
+            - **79% smaller binaries** (13.41MB → ~2.8MB per binary)*
+            - **UPX v5.0.1 LZMA compression** applied to supported platforms
             - **Static binaries** with embedded timezone database
             - **Works offline** - no external dependencies
             - **Cross-platform** support (Windows, macOS, Linux × AMD64/ARM64)
             
             ### 📊 Binary Sizes (UPX v5.0.1 Compressed)
-            All binaries are ultra-optimized with:
+            Optimized binaries with:
             - `CGO_ENABLED=0` - Static linking
             - `-ldflags="-s -w"` - Strip symbols
             - `-trimpath` - Remove build paths  
-            - `upx v5.0.1 --best --lzma` - Latest compression
+            - `upx v5.0.1 --best --lzma` - Latest compression*
             - `--force-macos` flag for macOS compatibility
             
-            Typical sizes: ~2.8MB per binary (vs 13.41MB unoptimized)
+            **UPX Compression Coverage:**
+            - ✅ **Windows x64**: ~2.8MB (70%+ reduction)
+            - ⚠️ **Windows ARM64**: ~9.1MB (UPX v5.0.1 not yet supported)
+            - ✅ **macOS x64**: ~2.9MB (70%+ reduction) 
+            - ✅ **macOS ARM64**: ~2.6MB (72%+ reduction)
+            - ✅ **Linux x64**: ~2.9MB (70%+ reduction)
+            - ✅ **Linux ARM64**: ~2.5MB (73%+ reduction)
             
             ### 🛠️ Technical Details
             - **Timezone Fix**: Embedded IANA timezone database
             - **Static Binaries**: No CGO dependencies
             - **UPX v5.0.1**: Latest compression with macOS support
             - **Cross-platform tested**: All binaries verified post-compression
+            - **Note**: Windows ARM64 uses uncompressed binary (~9MB) due to UPX limitation
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

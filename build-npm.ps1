@@ -93,6 +93,13 @@ if ($upxChoice -ne "n" -and $upxChoice -ne "N") {
             $platform = (Split-Path (Split-Path $_.FullName -Parent) -Leaf)
             $binaryName = $_.Name
             
+            # Skip Windows ARM64 - not supported by UPX v5.0.1
+            if ($platform -eq "win32-arm64") {
+                Write-Host "  ⏭️  Skipping $platform/$binaryName - UPX v5.0.1 doesn't support Windows ARM64 yet" -ForegroundColor Gray
+                $totalCompressedSize += $originalSize
+                return
+            }
+            
             Write-Host "Compressing $platform/$binaryName..." -ForegroundColor Gray
             
             # Use appropriate UPX flags based on platform
