@@ -126,22 +126,45 @@ async function main() {
   await runSalatCLI(binaryPath, args);
 }
 
-// ES module entry point check - fixed for Bun compatibility
-const isMainModule = () => {
-  // For Bun/Windows: normalize paths for comparison
-  const metaPath = import.meta.url.replace('file:///', '').replace(/\//g, '\\');
-  const argvPath = process.argv[1];
-  
-  return metaPath === argvPath || 
-         import.meta.url === `file://${process.argv[1]}` || 
-         import.meta.url.endsWith(process.argv[1]);
+// ES module entry point check - cross-platform compatible
+const isMainModule = async () => {
+  try {
+    if (import.meta.url === `file://${process.argv[1]}`) {
+      return true;
+    }
+    
+    if (import.meta.url.endsWith(process.argv[1])) {
+      return true;
+    }
+    
+    const { fileURLToPath } = await import('url');
+    const metaPath = fileURLToPath(import.meta.url);
+    const argvPath = process.argv[1];
+    
+    // Direct path comparison
+    if (metaPath === argvPath) {
+      return true;
+    }
+    
+    const path = await import('path');
+    const normalizedMeta = path.resolve(metaPath);
+    const normalizedArgv = path.resolve(argvPath);
+    
+    return normalizedMeta === normalizedArgv;
+  } catch (error) {
+    console.warn('Entry point detection failed, assuming direct execution');
+    return true;
+  }
 };
 
-if (isMainModule()) {
-  main().catch(error => {
-    console.error('❌ Unexpected error:', error.message);
-    (typeof Deno !== 'undefined' ? Deno.exit : process.exit)(1);
-  });
-}
+// Use async wrapper for isMainModule
+(async () => {
+  if (await isMainModule()) {
+    main().catch(error => {
+      console.error('❌ Unexpected error:', error.message);
+      (typeof Deno !== 'undefined' ? Deno.exit : process.exit)(1);
+    });
+  }
+})();
 
 export { getBinaryPath, getPlatform, runSalatCLI };
