@@ -18,12 +18,19 @@ Aplikasi CLI untuk menampilkan jadwal sholat dengan **smart location input** dan
 ## 📦 Instalasi
 
 ```bash
-# Install global
+# Install global (recommended)
 npm install -g salat-cli
 
 # Atau jalankan langsung tanpa install
 npx salat-cli
 ```
+
+### 🔧 Catatan Kompatibilitas
+
+- ✅ **NPM**: Fully supported untuk semua platform
+- ⚠️ **Bun**: Known issue dengan Windows binary pada versi 1.6.4
+  - Gunakan NPM untuk instalasi yang lebih stabil
+  - Issue akan diperbaiki di versi mendatang
 
 ## 📖 Penggunaan
 
