@@ -73,9 +73,10 @@ Get-ChildItem "npm-package/bin" -Recurse -File | ForEach-Object {
 
 # UPX Compression option
 Write-Host "`n🗜️  UPX Compression:" -ForegroundColor Cyan
-$upxChoice = Read-Host "Apply UPX compression to all binaries? (y/N)"
+Write-Host "Note: CI/CD automatically applies UPX compression to published NPM packages" -ForegroundColor Gray
+$upxChoice = Read-Host "Apply UPX compression to local builds? (Y/n)"
 
-if ($upxChoice -eq "y" -or $upxChoice -eq "Y") {
+if ($upxChoice -ne "n" -and $upxChoice -ne "N") {
     # Check if UPX is available
     $upxPath = Get-Command upx -ErrorAction SilentlyContinue
     if ($upxPath) {
