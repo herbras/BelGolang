@@ -42,6 +42,14 @@ jobs:
           GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o npm-package/bin/win32-x64/salat.exe .
           GOOS=windows GOARCH=arm64 go build -ldflags="-s -w" -o npm-package/bin/win32-arm64/salat.exe .
           
+      - name: Build WASM
+        run: |
+          # Build WebAssembly module
+          GOOS=js GOARCH=wasm go build -ldflags="-s -w" -o wasm/salat.wasm ./cmd/wasm
+          
+          # Copy Go WASM exec helper
+          cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" wasm/
+          
       - name: Make binaries executable
         run: |
           chmod +x npm-package/bin/*/salat
@@ -69,6 +77,9 @@ jobs:
           tag_name: ${{ github.ref_name }}
           files: |
             npm-package/bin/**/*
+            wasm/salat.wasm
+            wasm/salat.js
+            wasm/wasm_exec.js
           body_path: npm-package/README.md
           generate_release_notes: false
         env:

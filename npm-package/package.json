@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "bin": {
-    "salat": "./index.js"
+    "salat": "index.js"
   },
   "scripts": {
     "postinstall": "node index.js --verify-install",
@@ -35,14 +35,23 @@
   "bugs": {
     "url": "https://github.com/herbras/BelGolang/issues"
   },
-  "os": ["darwin", "linux", "win32"],
-  "cpu": ["x64", "arm64"],
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
   "engines": {
     "node": ">=14.0.0",
     "bun": ">=1.0.0"
   },
   "deno": {
-    "permissions": ["--allow-run"]
+    "permissions": [
+      "--allow-run"
+    ]
   },
   "files": [
     "bin/**/*",
