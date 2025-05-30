@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -77,32 +76,7 @@ func (api *SalatAPI) ProcessPrayerTime(this js.Value, args []js.Value) interface
 	}
 
 	// Build result as JSON string
-	result := fmt.Sprintf(`{
-		"location": {
-			"latitude": %f,
-			"longitude": %f
-		},
-		"method": "%s",
-		"date": "%s",
-		"prayers": {
-			"imsak": "%s",
-			"subuh": "%s",
-			"dzuhur": "%s",
-			"ashar": "%s",
-			"maghrib": "%s",
-			"isya": "%s"
-		},
-		"current": {
-			"prayer": "%s",
-			"emoji": "%s"
-		},
-		"next": {
-			"prayer": "%s",
-			"time": "%s",
-			"emoji": "%s"
-		},
-		"timestamp": "%s"
-	}`,
+	result := fmt.Sprintf(`{"location":{"latitude":%f,"longitude":%f},"method":"%s","date":"%s","prayers":{"imsak":"%s","subuh":"%s","dzuhur":"%s","ashar":"%s","maghrib":"%s","isya":"%s"},"current":{"prayer":"%s","emoji":"%s"},"next":{"prayer":"%s","time":"%s","emoji":"%s"},"timestamp":"%s"}`,
 		lat, lng,
 		string(method),
 		now.Format("2006-01-02"),
@@ -125,59 +99,36 @@ func (api *SalatAPI) ProcessPrayerTime(this js.Value, args []js.Value) interface
 
 // GetVersion returns the current version
 func (api *SalatAPI) GetVersion(this js.Value, args []js.Value) interface{} {
-	return `{
-		"version": "1.6.1",
-		"build": "wasm",
-		"runtime": "browser",
-		"methods": "MWL,ISNA,Egypt,Makkah,Karachi,Tehran,Kemenag,JAKIM"
-	}`
+	return `{"version":"1.6.1","build":"wasm","runtime":"browser","methods":"MWL,ISNA,Egypt,Makkah,Karachi,Tehran,Kemenag,JAKIM"}`
 }
 
 // ProcessCommand processes CLI-like commands
 func (api *SalatAPI) ProcessCommand(this js.Value, args []js.Value) interface{} {
 	if len(args) < 1 {
-		return `{"error": "No command provided"}`
+		return `{"error":"No command provided"}`
 	}
 
 	command := args[0].String()
 
 	switch command {
 	case "help":
-		return `{
-			"commands": [
-				"prayer <lat> <lng> [method] - Calculate prayer times",
-				"version - Get version info",
-				"methods - List available calculation methods",
-				"help - Show this help"
-			]
-		}`
+		return `{"commands":["prayer <lat> <lng> [method] - Calculate prayer times","version - Get version info","methods - List available calculation methods","help - Show this help"]}`
 	case "version":
 		return api.GetVersion(this, args[1:])
 	case "methods":
-		return `{
-			"methods": [
-				"MWL - Muslim World League",
-				"ISNA - Islamic Society of North America",
-				"Egypt - Egyptian General Authority of Survey",
-				"Makkah - Umm al-Qura University, Makkah",
-				"Karachi - University of Islamic Sciences, Karachi",
-				"Tehran - Institute of Geophysics, University of Tehran",
-				"Kemenag - Kementerian Agama Republik Indonesia (default)",
-				"JAKIM - Jabatan Kemajuan Islam Malaysia"
-			]
-		}`
+		return `{"methods":["MWL - Muslim World League","ISNA - Islamic Society of North America","Egypt - Egyptian General Authority of Survey","Makkah - Umm al-Qura University, Makkah","Karachi - University of Islamic Sciences, Karachi","Tehran - Institute of Geophysics, University of Tehran","Kemenag - Kementerian Agama Republik Indonesia (default)","JAKIM - Jabatan Kemajuan Islam Malaysia"]}`
 	case "prayer":
 		if len(args) < 3 {
-			return `{"error": "Prayer command requires: lat, lng, [method]"}`
+			return `{"error":"Prayer command requires: lat, lng, [method]"}`
 		}
 		// Convert string args to proper types
 		lat, err := strconv.ParseFloat(args[1].String(), 64)
 		if err != nil {
-			return fmt.Sprintf(`{"error": "Invalid latitude: %s"}`, args[1].String())
+			return fmt.Sprintf(`{"error":"Invalid latitude: %s"}`, args[1].String())
 		}
 		lng, err := strconv.ParseFloat(args[2].String(), 64)
 		if err != nil {
-			return fmt.Sprintf(`{"error": "Invalid longitude: %s"}`, args[2].String())
+			return fmt.Sprintf(`{"error":"Invalid longitude: %s"}`, args[2].String())
 		}
 
 		// Create new args with proper types
@@ -191,7 +142,7 @@ func (api *SalatAPI) ProcessCommand(this js.Value, args []js.Value) interface{} 
 
 		return api.ProcessPrayerTime(this, newArgs)
 	default:
-		return fmt.Sprintf(`{"error": "Unknown command: %s"}`, command)
+		return fmt.Sprintf(`{"error":"Unknown command: %s"}`, command)
 	}
 }
 
@@ -213,9 +164,7 @@ func main() {
 		input := args[0].String()
 		parts := strings.Fields(input)
 		if len(parts) == 0 {
-			result := api.ProcessCommand(this, []js.Value{js.ValueOf("help")})
-			jsonBytes, _ := json.Marshal(result)
-			return string(jsonBytes)
+			return api.ProcessCommand(this, []js.Value{js.ValueOf("help")})
 		}
 
 		jsArgs := make([]js.Value, len(parts))
@@ -223,9 +172,7 @@ func main() {
 			jsArgs[i] = js.ValueOf(part)
 		}
 
-		result := api.ProcessCommand(this, jsArgs)
-		jsonBytes, _ := json.Marshal(result)
-		return string(jsonBytes)
+		return api.ProcessCommand(this, jsArgs)
 	}))
 
 	fmt.Println("🕌 Salat WASM API ready!")
