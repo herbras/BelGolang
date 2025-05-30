@@ -194,30 +194,26 @@ func (api *SalatAPI) ProcessCommand(this js.Value, args []js.Value) interface{} 
 }
 
 func main() {
-	// Keep the program running
-	c := make(chan struct{}, 0)
-
 	// Create API instance
 	api := &SalatAPI{}
 
-	// Register global functions
-	js.Global().Set("salat", js.ValueOf(map[string]interface{}{
-		"prayerTime":     js.FuncOf(api.ProcessPrayerTime),
-		"version":        js.FuncOf(api.GetVersion),
-		"processCommand": js.FuncOf(api.ProcessCommand),
-	}))
+	// Register individual functions instead of complex objects
+	js.Global().Set("salatPrayerTime", js.FuncOf(api.ProcessPrayerTime))
+	js.Global().Set("salatVersion", js.FuncOf(api.GetVersion))
+	js.Global().Set("salatCommand", js.FuncOf(api.ProcessCommand))
 
-	// Register console-style API for terminal libraries
+	// Register console-style API
 	js.Global().Set("salatConsole", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		if len(args) < 1 {
 			return "Usage: salatConsole('command arg1 arg2')"
 		}
 
 		input := args[0].String()
-		// Simple command parsing
 		parts := strings.Fields(input)
 		if len(parts) == 0 {
-			return api.ProcessCommand(this, []js.Value{js.ValueOf("help")})
+			result := api.ProcessCommand(this, []js.Value{js.ValueOf("help")})
+			jsonBytes, _ := json.Marshal(result)
+			return string(jsonBytes)
 		}
 
 		jsArgs := make([]js.Value, len(parts))
@@ -232,10 +228,11 @@ func main() {
 
 	fmt.Println("🕌 Salat WASM API ready!")
 	fmt.Println("Available functions:")
-	fmt.Println("- salat.prayerTime(lat, lng, [method])")
-	fmt.Println("- salat.version()")
-	fmt.Println("- salat.processCommand(command, ...args)")
+	fmt.Println("- salatPrayerTime(lat, lng, [method])")
+	fmt.Println("- salatVersion()")
+	fmt.Println("- salatCommand(command, ...args)")
 	fmt.Println("- salatConsole('command args')")
 
-	<-c
+	// Keep the program running without channels
+	select {}
 }

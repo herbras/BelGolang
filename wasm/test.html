@@ -43,7 +43,7 @@
                 return;
             }
             try {
-                const result = salat.version();
+                const result = salatVersion();
                 log("Version: " + JSON.stringify(result, null, 2));
             } catch (e) {
                 log("❌ Version error: " + e);
@@ -57,7 +57,7 @@
             }
             try {
                 // Jakarta coordinates
-                const result = salat.prayerTime(-6.2088, 106.8456, "Kemenag");
+                const result = salatPrayerTime(-6.2088, 106.8456, "Kemenag");
                 log("Prayer Times: " + JSON.stringify(result, null, 2));
             } catch (e) {
                 log("❌ Prayer times error: " + e);
