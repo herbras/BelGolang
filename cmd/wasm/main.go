@@ -8,7 +8,7 @@ import (
 	"syscall/js"
 	"time"
 
-	"github.com/herbras/BelGolang/salat"
+	"jadwalsalat/salat"
 )
 
 // SalatAPI represents the main API for WASM

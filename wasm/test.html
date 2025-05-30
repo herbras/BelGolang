@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Salat WASM Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #output { background: #f0f0f0; padding: 10px; margin: 10px 0; }
+        button { padding: 10px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🕌 Salat WASM Test</h1>
+    
+    <button onclick="testVersion()">Test Version</button>
+    <button onclick="testPrayerTimes()">Test Prayer Times (Jakarta)</button>
+    <button onclick="testCommand()">Test Command</button>
+    
+    <div id="output"></div>
+
+    <script src="wasm_exec.js"></script>
+    <script>
+        const go = new Go();
+        let wasmLoaded = false;
+        
+        // Load WASM
+        WebAssembly.instantiateStreaming(fetch("salat.wasm"), go.importObject)
+            .then((result) => {
+                go.run(result.instance);
+                wasmLoaded = true;
+                log("✅ WASM loaded successfully!");
+            })
+            .catch(err => {
+                log("❌ WASM load error: " + err);
+            });
+
+        function log(message) {
+            document.getElementById('output').innerHTML += message + '<br>';
+        }
+
+        function testVersion() {
+            if (!wasmLoaded) {
+                log("❌ WASM not loaded yet");
+                return;
+            }
+            try {
+                const result = salat.version();
+                log("Version: " + JSON.stringify(result, null, 2));
+            } catch (e) {
+                log("❌ Version error: " + e);
+            }
+        }
+
+        function testPrayerTimes() {
+            if (!wasmLoaded) {
+                log("❌ WASM not loaded yet");
+                return;
+            }
+            try {
+                // Jakarta coordinates
+                const result = salat.prayerTime(-6.2088, 106.8456, "Kemenag");
+                log("Prayer Times: " + JSON.stringify(result, null, 2));
+            } catch (e) {
+                log("❌ Prayer times error: " + e);
+            }
+        }
+
+        function testCommand() {
+            if (!wasmLoaded) {
+                log("❌ WASM not loaded yet");
+                return;
+            }
+            try {
+                const result = salatConsole("prayer -6.2088 106.8456 Kemenag");
+                log("Command result: " + result);
+            } catch (e) {
+                log("❌ Command error: " + e);
+            }
+        }
+    </script>
+</body>
+</html> 
