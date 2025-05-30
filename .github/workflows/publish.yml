@@ -48,8 +48,6 @@ jobs:
           
       - name: Copy package files
         run: |
-          cp npm-package/package.json npm-package/
-          cp npm-package/index.js npm-package/
           echo 'MIT' > npm-package/LICENSE
           
       - name: Setup Node.js
